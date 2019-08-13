@@ -1,4 +1,4 @@
-package com.iedayan03.sportsupport;
+package com.iedayan03.sportsupport.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.iedayan03.sportsupport.Classes.Field;
+import com.iedayan03.sportsupport.CustomAdapters.FieldAdapter;
+import com.iedayan03.sportsupport.FieldActivity;
+import com.iedayan03.sportsupport.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,9 +39,7 @@ public class HomeFragment extends Fragment {
     private static final String FIELD_PLACE_ID = "Field PlaceId";
 
     ListView fieldListView; // We could maybe implement a RecyclerView. Should look into it if we have time.
-    ArrayList<String> fieldArray;
-    ArrayList<String> fieldAddresses;
-    ArrayList<String> fieldPlaceIds;
+    ArrayList<Field> fieldArray;
     private RequestQueue mQueue;
     private String fetchFieldsUrl = "http://iedayan03.web.illinois.edu/fetch_fields.php";
 
@@ -57,8 +58,6 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         fieldListView = view.findViewById(R.id.fieldListView);
         fieldArray = new ArrayList<>();
-        fieldAddresses = new ArrayList<>();
-        fieldPlaceIds = new ArrayList<>();
 
         mQueue = Volley.newRequestQueue(getActivity());
         loadFields();
@@ -71,9 +70,10 @@ public class HomeFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // Make sure to send more data/information about the soccer field. I have not yet retrieved
                 // other information about the soccer field from the database.
-                String itemName = (String) adapterView.getItemAtPosition(position);
-                String itemAddress = fieldAddresses.get(position);
-                String fieldPlaceId = fieldPlaceIds.get(position);
+                Field fieldItem = (Field) adapterView.getItemAtPosition(position);
+                String itemName = fieldItem.getFieldName();
+                String itemAddress = fieldItem.getAddress();
+                String fieldPlaceId = fieldItem.getPlaceId();
 
                 Intent intent = new Intent(getContext(), FieldActivity.class);
                 intent.putExtra(FIELD_NAME, itemName);
@@ -97,13 +97,20 @@ public class HomeFragment extends Fragment {
                     JSONArray jsonArray = response.getJSONArray("data");
 
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject field = jsonArray.getJSONObject(i);
-                        String fieldName = field.getString("place_name");
-                        String fieldAddress = field.getString("address");
-                        String fieldPlaceId = field.getString("place_id");
-                        fieldArray.add(fieldName);
-                        fieldAddresses.add(fieldAddress);
-                        fieldPlaceIds.add(fieldPlaceId);
+                        JSONObject result = jsonArray.getJSONObject(i);
+                        String fieldName = result.getString("place_name").trim();
+                        String fieldAddress = result.getString("address");
+                        String fieldPlaceId = result.getString("place_id");
+                        String latitude = result.getString("latitude");
+                        String longitude = result.getString("longitude");
+                        String str_rating = result.getString("rating");
+
+                        Double rating;
+                        if (!str_rating.equals("null")) rating = Double.valueOf(str_rating);
+                        else rating = 0.0; // rating doesn't exist so I chose 0.0 as default
+
+                        Field field = new Field(fieldPlaceId, fieldName, fieldAddress, longitude, latitude, rating);
+                        fieldArray.add(field);
                     }
                     displayFields();
                 } catch (JSONException e) {
@@ -125,10 +132,8 @@ public class HomeFragment extends Fragment {
      */
     private void displayFields() {
         if (getActivity() != null) {
-            ArrayAdapter<String> listViewAdapter = new ArrayAdapter<>(
-                    getActivity(), android.R.layout.simple_list_item_1, fieldArray
-            );
-            fieldListView.setAdapter(listViewAdapter);
+            FieldAdapter fieldAdapter = new FieldAdapter(getActivity(), R.layout.field_list, fieldArray);
+            fieldListView.setAdapter(fieldAdapter);
         }
     }
 }

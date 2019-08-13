@@ -50,25 +50,25 @@
         android:id="@+id/homePlayerListViewId"
         android:layout_width="0dp"
         android:layout_height="350dp"
-        android:layout_marginTop="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/awayPlayerListViewId"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fieldAddressId"
-        app:layout_constraintVertical_bias=".096"
-        android:layout_marginRight="8dp" />
+        app:layout_constraintVertical_bias="0.057" />
 
     <!-- Away Team Roster -->
     <ListView
-        android:layout_width="0dp"
         android:id="@+id/awayPlayerListViewId"
+        android:layout_width="0dp"
         android:layout_height="350dp"
-        android:layout_marginTop="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
@@ -76,31 +76,65 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/homePlayerListViewId"
         app:layout_constraintTop_toBottomOf="@id/fieldAddressId"
-        app:layout_constraintVertical_bias="0.096" />
+        app:layout_constraintVertical_bias="0.057" />
 
-    <!-- Swap Team Button-->
+    <!-- Join/Leave Game Button -->
+    <Button
+        android:id="@+id/joinTeam1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/roundedbutton"
+        android:text="@string/join_button_text"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.159"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/homePlayerListViewId" />
+
+    <Button
+        android:id="@+id/joinTeam2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/roundedbutton"
+        android:text="@string/join_button_text"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.691"
+        app:layout_constraintStart_toEndOf="@+id/joinTeam1"
+        app:layout_constraintTop_toBottomOf="@+id/awayPlayerListViewId" />
+
     <Button
         android:id="@+id/swapTeamBtnId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="396dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Swap Team"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@id/joinLeaveBtnId"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/homePlayerListViewId"
-        app:layout_constraintVertical_bias="0.503" />
+        android:background="@drawable/roundedbutton"
+        android:text="@string/swap_team"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/joinTeam2"
+        app:layout_constraintStart_toEndOf="@+id/joinTeam1"
+        app:layout_constraintTop_toBottomOf="@+id/fieldAddressId"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <!-- Join/Leave Game Button -->
+    <!-- Record Game Button-->
     <Button
-        android:id="@+id/joinLeaveBtnId"
+        android:id="@+id/start_game_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -109,27 +143,14 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="20dp"
-        android:text="@string/join_button_text"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toTopOf="@id/start_game_button"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/swapTeamBtnId"
-        app:layout_constraintVertical_bias="0.5" />
-
-    <!-- Record Game Button-->
-    <Button
-        android:id="@+id/start_game_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:alpha="0.5"
+        android:onClick="recordGame"
+        android:text="@string/record_game_button_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:text="@string/record_game_button_text"
-        android:onClick="recordGame"
-        android:alpha="0.5"/>
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/swapTeamBtnId"
+        app:layout_constraintVertical_bias="0.41" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

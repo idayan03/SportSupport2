@@ -1,4 +1,4 @@
-package com.iedayan03.sportsupport;
+package com.iedayan03.sportsupport.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.iedayan03.sportsupport.PlayerViewActivity;
+import com.iedayan03.sportsupport.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;

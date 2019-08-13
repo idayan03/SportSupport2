@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.iedayan03.sportsupport.Fragments.HomeFragment;
+import com.iedayan03.sportsupport.Fragments.ProfileFragment;
+import com.iedayan03.sportsupport.Fragments.RankFragment;
 
 import static com.iedayan03.sportsupport.R.id.navigation_rank;
 

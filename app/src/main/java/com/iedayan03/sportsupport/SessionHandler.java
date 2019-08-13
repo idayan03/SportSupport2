@@ -3,6 +3,8 @@ package com.iedayan03.sportsupport;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.iedayan03.sportsupport.Classes.User;
+
 import java.util.Date;
 
 public class SessionHandler {

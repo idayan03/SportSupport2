@@ -21,6 +21,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.iedayan03.sportsupport.Classes.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,7 +54,7 @@ public class FieldActivity extends AppCompatActivity {
     private TextView fieldNameTextView;
     private TextView fieldAddressTextView;
 
-    Button joinLeaveBtn, swapTeamBtn, startGameBtn;
+    Button joinTeam1, swapTeamBtn, startGameBtn;
     boolean isJoined = false;
 
     private SessionHandler session;
@@ -63,6 +64,7 @@ public class FieldActivity extends AppCompatActivity {
     private RequestQueue queue;
     private String fieldAddress;
     private String fieldName;
+    private Button joinTeam2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +76,8 @@ public class FieldActivity extends AppCompatActivity {
         currUser = session.getUserDetails();
         playerName = currUser.getUsername();
 
-        joinLeaveBtn = findViewById(R.id.joinLeaveBtnId);
+        joinTeam1 = findViewById(R.id.joinTeam1);
+        joinTeam2 = findViewById(R.id.joinTeam2);
         swapTeamBtn = findViewById(R.id.swapTeamBtnId);
         startGameBtn = findViewById(R.id.start_game_button);
         swapTeamBtn.setClickable(isJoined); // not pressable if no team joined
@@ -99,14 +102,28 @@ public class FieldActivity extends AppCompatActivity {
         awayPlayerListView.setAdapter(awayAdapter);
 
         /*
-         * OnClickListener that adds a player's name to the arraylist "playerName"
+         * OnClickListener that adds a player's name to the arraylist "homePlayerNames"
          */
-        joinLeaveBtn.setOnClickListener(new OnClickListener() {
+        joinTeam1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 // check if player has already been added
                 if (!isJoined) {
-                    joinGame();
+                    joinGame(0); // team 0 refers to Home Players
+                } else {
+                    leaveGame();
+                }
+            }
+        });
+
+        /*
+         * OnClickListener that adds a player's name to the arraylist "awayPlayerNames"
+         */
+        joinTeam2.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isJoined) {
+                    joinGame(1); // team 1 refers to Away Players
                 } else {
                     leaveGame();
                 }
@@ -174,7 +191,7 @@ public class FieldActivity extends AppCompatActivity {
     private void updateIsJoined() {
         isJoined = homePlayerNames.contains(playerName)
                 || awayPlayerNames.contains(playerName);
-        joinLeaveBtn.setText(isJoined ?
+        joinTeam1.setText(isJoined ?
                 getString(R.string.leave_button_text) :
                 getString(R.string.join_button_text) );
 
@@ -183,7 +200,6 @@ public class FieldActivity extends AppCompatActivity {
 
         startGameBtn.setClickable(isJoined);
         startGameBtn.setAlpha(isJoined ? 1 : (float) 0.5);
-
     }
 
     /**
@@ -200,6 +216,7 @@ public class FieldActivity extends AppCompatActivity {
                     JSONObject responseData = response.getJSONObject("data");
                     homePlayerNames.clear();
                     awayPlayerNames.clear();
+
                     if (responseData.has("isHome")) {
                         userNameArray = responseData.getJSONArray("isHome");
 
@@ -209,6 +226,7 @@ public class FieldActivity extends AppCompatActivity {
                             homeAdapter.notifyDataSetChanged();
                         }
                     }
+
                     if (responseData.has("isAway")){
                         userNameArray = responseData.getJSONArray("isAway");
 
@@ -237,7 +255,10 @@ public class FieldActivity extends AppCompatActivity {
         queue.add(request);
     }
 
-    private void joinGame() {
+    /**
+     *
+     */
+    private void joinGame(final int team) {
         if (homePlayerNames.indexOf(playerName) == -1) {
             StringRequest postRequest = new StringRequest(Request.Method.POST, joinGameURL,
                     new Response.Listener<String>() {
@@ -245,9 +266,15 @@ public class FieldActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             int retval = Integer.parseInt(response);
                             if (retval == 1) {
-                                homePlayerNames.add(playerName);
-                                homeAdapter.notifyDataSetChanged();
-                                updateIsJoined();
+                                if (team == 0) {
+                                    homePlayerNames.add(playerName);
+                                    homeAdapter.notifyDataSetChanged();
+                                    updateIsJoined();
+                                } else if (team == 1) {
+                                    awayPlayerNames.add(playerName);
+                                    awayAdapter.notifyDataSetChanged();
+                                    updateIsJoined();
+                                }
                             }
                         }
                     }, new Response.ErrorListener() {
@@ -270,6 +297,9 @@ public class FieldActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     *
+     */
     private void leaveGame(){
         final int indexOfPlayer = Math.max(
                 homePlayerNames.indexOf(playerName),

@@ -1,4 +1,4 @@
-package com.iedayan03.sportsupport;
+package com.iedayan03.sportsupport.Classes;
 
 import java.util.Date;
 

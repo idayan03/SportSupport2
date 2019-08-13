@@ -117,4 +117,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="rank">Rank</string>
+    <string name="swap_team">Swap Team</string>
+    <string name="home_team">Home Team</string>
 </resources>

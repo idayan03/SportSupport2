@@ -1,4 +1,4 @@
-package com.iedayan03.sportsupport;
+package com.iedayan03.sportsupport.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +18,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.iedayan03.sportsupport.Classes.User;
+import com.iedayan03.sportsupport.LoginActivity;
+import com.iedayan03.sportsupport.R;
+import com.iedayan03.sportsupport.SessionHandler;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
