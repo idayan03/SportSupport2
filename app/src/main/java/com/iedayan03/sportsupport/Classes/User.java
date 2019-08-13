@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class User {
     private String fullName, username, password;
+    private Double latitude, longitude;
     Date sessionExpiryDate;
 
 
@@ -37,5 +38,21 @@ public class User {
 
     public void setSessionExpiryDate(Date sessionExpiryDate) {
         this.sessionExpiryDate = sessionExpiryDate;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }
