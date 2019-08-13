@@ -1,6 +1,8 @@
 package com.iedayan03.sportsupport.Classes;
 
-public class Field {
+import java.io.Serializable;
+
+public class Field implements Serializable {
 
     private String place_id;
     private String field_name;

@@ -48,9 +48,7 @@ import java.util.ArrayList;
 public class HomeFragment extends Fragment implements LocationListener {
 
     private int GPS_PERMISSION_CODE = 1;
-    private static final String FIELD_NAME = "Field Name";
-    public static final String FIELD_ADDRESS = "Field Address";
-    private static final String FIELD_PLACE_ID = "Field PlaceId";
+    private static final String CURR_FIELD = "CURR_FIELD";
 
     private ListView fieldListView; // We could maybe implement a RecyclerView. Should look into it if we have time.
     private ArrayList<Field> fieldArray;
@@ -84,7 +82,7 @@ public class HomeFragment extends Fragment implements LocationListener {
 
         locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
 
-        /**
+        /*
          * First checks if the GPS permission is already granted: if it is then set location of the user;
          * if not then calls 'requestGPSPermission()'.
          */
@@ -113,7 +111,7 @@ public class HomeFragment extends Fragment implements LocationListener {
         mQueue = Volley.newRequestQueue(getActivity());
         loadFields();
 
-        /**
+        /*
          * A listener that will direct the user to the activity "FieldActivity" when a soccer field
          * is clicked. This is incomplete as of now.
          */
@@ -122,14 +120,9 @@ public class HomeFragment extends Fragment implements LocationListener {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // change this so that the Field object is sent to the new Intent!
                 Field fieldItem = (Field) adapterView.getItemAtPosition(position);
-                String itemName = fieldItem.getFieldName();
-                String itemAddress = fieldItem.getAddress();
-                String fieldPlaceId = fieldItem.getPlaceId();
 
                 Intent intent = new Intent(getContext(), FieldActivity.class);
-                intent.putExtra(FIELD_NAME, itemName);
-                intent.putExtra(FIELD_ADDRESS, itemAddress);
-                intent.putExtra(FIELD_PLACE_ID, fieldPlaceId);
+                intent.putExtra(CURR_FIELD, fieldItem);
                 mQueue.stop();
                 startActivity(intent);
             }

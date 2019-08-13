@@ -21,6 +21,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.iedayan03.sportsupport.Classes.Field;
 import com.iedayan03.sportsupport.Classes.User;
 
 import org.json.JSONArray;
@@ -35,10 +36,9 @@ import static android.view.View.OnClickListener;
 
 public class FieldActivity extends AppCompatActivity {
 
-    private static final String FIELD_NAME = "Field Name";
-    private static final String FIELD_ADDRESS = "Field Address";
-    private static final String FIELD_PLACE_ID = "Field PlaceId";
+    private static final String CURR_FIELD = "CURR_FIELD";
     private static final String USERNAME = "Username";
+    private static final int TEAM_SIZE = 11;
 
     private static final String joinGameURL = "http://iedayan03.web.illinois.edu/join_game.php";
     private static final String leaveGameURL = "http://iedayan03.web.illinois.edu/leave_game.php";
@@ -62,8 +62,7 @@ public class FieldActivity extends AppCompatActivity {
     private String playerName;
     private String place_id; // primary key of Field
     private RequestQueue queue;
-    private String fieldAddress;
-    private String fieldName;
+    private Field currField;
     private Button joinTeam2;
 
     @Override
@@ -85,18 +84,16 @@ public class FieldActivity extends AppCompatActivity {
 
         fieldNameTextView = findViewById(R.id.fieldNameId);
         fieldAddressTextView = findViewById(R.id.fieldAddressId);
-        fieldName = getIntent().getExtras().getString(FIELD_NAME);
-        fieldAddress = getIntent().getExtras().getString(FIELD_ADDRESS);
-        place_id = getIntent().getExtras().getString(FIELD_PLACE_ID);
-        fieldNameTextView.setText(fieldName);
-        fieldAddressTextView.setText(fieldAddress);
+        currField = (Field) getIntent().getSerializableExtra(CURR_FIELD);
+        fieldNameTextView.setText(currField.getFieldName());
+        fieldAddressTextView.setText(currField.getAddress());
 
-        homePlayerNames = new ArrayList<>(11);
+        homePlayerNames = new ArrayList<>(TEAM_SIZE);
         homePlayerListView = findViewById(R.id.homePlayerListViewId);
         homeAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, homePlayerNames);
         homePlayerListView.setAdapter(homeAdapter);
 
-        awayPlayerNames = new ArrayList<>(11);
+        awayPlayerNames = new ArrayList<>(TEAM_SIZE);
         awayPlayerListView = findViewById(R.id.awayPlayerListViewId);
         awayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, awayPlayerNames);
         awayPlayerListView.setAdapter(awayAdapter);
@@ -355,7 +352,7 @@ public class FieldActivity extends AppCompatActivity {
      * @param view
      */
     public void displayLocation(View view) {
-        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + fieldAddress);
+        Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + currField.getAddress());
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
         startActivity(mapIntent);
