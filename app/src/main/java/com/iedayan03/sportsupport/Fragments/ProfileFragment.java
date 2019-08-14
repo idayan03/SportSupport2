@@ -95,8 +95,6 @@ public class ProfileFragment extends Fragment {
         position.setOnItemSelectedListener(new OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int new_position, long id)
             {
-
-
                 String selectedItem = parent.getItemAtPosition(new_position).toString();
                 int selected_item =  position.getSelectedItemPosition();
                 SharedPreferences sp = getActivity().getSharedPreferences("Position",0);

@@ -114,6 +114,7 @@
         android:layout_marginBottom="8dp"
         android:text="@string/don_t_have_an_account"
         android:textStyle="bold"
+        app:fontFamily="@font/lora_bold_italic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"

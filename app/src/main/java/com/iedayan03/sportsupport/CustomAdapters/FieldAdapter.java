@@ -20,7 +20,7 @@ public class FieldAdapter extends ArrayAdapter<Field> {
     private Context context;
 
     // The ArrayList that will contain the fields
-    private ArrayList<Field> fields = new ArrayList<>();
+    private ArrayList<Field> fields;
 
     // This is the ID of the layout resource that getView() would inflate to create the view
     private int mResource;
@@ -32,7 +32,7 @@ public class FieldAdapter extends ArrayAdapter<Field> {
      * @param fields The ArrayList that will contain the fields
      */
     public FieldAdapter(@NonNull Context context, int resource, ArrayList<Field> fields) {
-        super(context, 0, fields);
+        super(context, resource, fields);
         this.context = context;
         this.fields = fields;
         this.mResource = resource;

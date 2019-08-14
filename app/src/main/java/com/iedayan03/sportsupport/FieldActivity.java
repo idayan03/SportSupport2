@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -23,6 +22,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.iedayan03.sportsupport.Classes.Field;
 import com.iedayan03.sportsupport.Classes.User;
+import com.iedayan03.sportsupport.CustomAdapters.TeamAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,9 +47,9 @@ public class FieldActivity extends AppCompatActivity {
     private static final String JOIN_GAME_ERROR_RESPONSE = "You Can Only Join Once";
     private static final String LEAVE_GAME_ERROR_RESPONSE = "You Have Already Left The Game";
 
-    private ArrayList<String> homePlayerNames, awayPlayerNames;
+    private ArrayList<User> homePlayerNames, awayPlayerNames;
     private ListView homePlayerListView, awayPlayerListView;
-    private ArrayAdapter<String> homeAdapter, awayAdapter;
+    private TeamAdapter homeAdapter, awayAdapter;
 
     private TextView fieldNameTextView;
     private TextView fieldAddressTextView;
@@ -60,7 +60,6 @@ public class FieldActivity extends AppCompatActivity {
     private SessionHandler session;
     private User currUser;
     private String playerName;
-    private String place_id; // primary key of Field
     private RequestQueue queue;
     private Field currField;
     private Button joinTeam2;
@@ -90,12 +89,12 @@ public class FieldActivity extends AppCompatActivity {
 
         homePlayerNames = new ArrayList<>(TEAM_SIZE);
         homePlayerListView = findViewById(R.id.homePlayerListViewId);
-        homeAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, homePlayerNames);
+        homeAdapter = new TeamAdapter(this, R.layout.team_list, homePlayerNames);
         homePlayerListView.setAdapter(homeAdapter);
 
         awayPlayerNames = new ArrayList<>(TEAM_SIZE);
         awayPlayerListView = findViewById(R.id.awayPlayerListViewId);
-        awayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, awayPlayerNames);
+        awayAdapter = new TeamAdapter(this, R.layout.team_list, awayPlayerNames);
         awayPlayerListView.setAdapter(awayAdapter);
 
         /*
@@ -147,7 +146,7 @@ public class FieldActivity extends AppCompatActivity {
                 }) {
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<>();
-                        params.put("place_id", place_id);
+                        params.put("place_id", currField.getPlaceId());
                         params.put("Username", playerName);
                         return params;
                     }
@@ -161,7 +160,7 @@ public class FieldActivity extends AppCompatActivity {
         homePlayerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                String username = homePlayerNames.get(position);
+                String username = homePlayerNames.get(position).getUsername();
                 Intent intent = new Intent(view.getContext(), PlayerViewActivity.class);
                 intent.putExtra(USERNAME, username);
                 startActivity(intent);
@@ -186,8 +185,8 @@ public class FieldActivity extends AppCompatActivity {
     }
 
     private void updateIsJoined() {
-        isJoined = homePlayerNames.contains(playerName)
-                || awayPlayerNames.contains(playerName);
+        isJoined = homePlayerNames.contains(currUser)
+                || awayPlayerNames.contains(currUser);
         joinTeam1.setText(isJoined ?
                 getString(R.string.leave_button_text) :
                 getString(R.string.join_button_text) );
@@ -204,7 +203,7 @@ public class FieldActivity extends AppCompatActivity {
      */
     private void loadPlayers() {
         // Need to send information about which field it is by sending a POST request.
-        final String fetchPlayersURL = "http://iedayan03.web.illinois.edu/fetch_players.php?place_id=" + place_id;
+        final String fetchPlayersURL = "http://iedayan03.web.illinois.edu/fetch_players.php?place_id=" + currField.getPlaceId();
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, fetchPlayersURL, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -218,28 +217,72 @@ public class FieldActivity extends AppCompatActivity {
                         userNameArray = responseData.getJSONArray("isHome");
 
                         for (int i = 0; i < userNameArray.length(); i++) {
-                            String playerName = (String) userNameArray.get(i);
-                            homePlayerNames.add(playerName);
-                            homeAdapter.notifyDataSetChanged();
+                            String playerUserName = (String) userNameArray.get(i);
+                            insertPlayerToTeam(playerUserName, 0);
                         }
                     }
 
-                    if (responseData.has("isAway")){
+                    if (responseData.has("isAway")) {
                         userNameArray = responseData.getJSONArray("isAway");
 
                         for (int i = 0; i < userNameArray.length(); i++) {
-                            String playerName = (String) userNameArray.get(i);
-                            awayPlayerNames.add(playerName);
-                            awayAdapter.notifyDataSetChanged();
+                            String playerUserName = (String) userNameArray.get(i);
+                            insertPlayerToTeam(playerUserName, 1);
                         }
                     }
 
                     Log.d("JSON response", responseData.toString());
                     updateIsJoined();
-
-
                 } catch (JSONException e) {
                     e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        queue.add(request);
+    }
+
+    /**
+     * Fetches the details of a user given their username and inserts them into either the home or away team.
+     *
+     * @param userName username of the player
+     * @param team 0 for home; 1 for away
+     */
+    private void insertPlayerToTeam(final String userName, final int team) {
+        String fetchUserURL = "http://iedayan03.web.illinois.edu/fetch_user.php?Username=" + userName;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, fetchUserURL, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray jsonArray = response.getJSONArray("data");
+                    JSONObject player = jsonArray.getJSONObject(0);
+
+                    User user = new User();
+                    user.setUsername(userName);
+                    user.setFullName(player.getString("FullName"));
+                    user.setPassword(player.getString("Password"));
+                    user.setPosition(player.getString("Position"));
+                    user.setRating(player.getDouble("Rating"));
+                    user.setGoals(player.getInt("Goals"));
+                    user.setAssists(player.getInt("Assists"));
+
+                    if (team == 0) {
+                        homePlayerNames.add(user);
+                        homeAdapter.notifyDataSetChanged();
+                    } else if (team == 1) {
+                        awayPlayerNames.add(user);
+                        awayAdapter.notifyDataSetChanged();
+                    }
+
+                } catch (JSONException error) {
+                    error.printStackTrace();
                 }
             }
         }, new Response.ErrorListener() {
@@ -256,7 +299,7 @@ public class FieldActivity extends AppCompatActivity {
      *
      */
     private void joinGame(final int team) {
-        if (homePlayerNames.indexOf(playerName) == -1) {
+        if (homePlayerNames.indexOf(currUser) == -1) {
             StringRequest postRequest = new StringRequest(Request.Method.POST, joinGameURL,
                     new Response.Listener<String>() {
                         @Override
@@ -264,11 +307,11 @@ public class FieldActivity extends AppCompatActivity {
                             int retval = Integer.parseInt(response);
                             if (retval == 1) {
                                 if (team == 0) {
-                                    homePlayerNames.add(playerName);
+                                    homePlayerNames.add(currUser);
                                     homeAdapter.notifyDataSetChanged();
                                     updateIsJoined();
                                 } else if (team == 1) {
-                                    awayPlayerNames.add(playerName);
+                                    awayPlayerNames.add(currUser);
                                     awayAdapter.notifyDataSetChanged();
                                     updateIsJoined();
                                 }
@@ -282,7 +325,7 @@ public class FieldActivity extends AppCompatActivity {
             }) {
                 protected Map<String, String> getParams() {
                     Map<String, String> params = new HashMap<>();
-                    params.put("place_id", place_id);
+                    params.put("place_id", currField.getPlaceId());
                     params.put("Username", playerName);
                     return params;
                 }
@@ -299,8 +342,8 @@ public class FieldActivity extends AppCompatActivity {
      */
     private void leaveGame(){
         final int indexOfPlayer = Math.max(
-                homePlayerNames.indexOf(playerName),
-                awayPlayerNames.indexOf(playerName));
+                homePlayerNames.indexOf(currUser),
+                awayPlayerNames.indexOf(currUser));
 
         // check if player is in the list, if player does not exist, do not remove again (should be safe though).
         if (indexOfPlayer > -1) {
@@ -311,8 +354,8 @@ public class FieldActivity extends AppCompatActivity {
                             int retval = Integer.parseInt(response);
                             if (retval == 1) {
                                 // avert eyes, should be safe lol
-                                homePlayerNames.remove(playerName);
-                                awayPlayerNames.remove(playerName);
+                                homePlayerNames.remove(currUser);
+                                awayPlayerNames.remove(currUser);
                                 homeAdapter.notifyDataSetChanged();
                                 awayAdapter.notifyDataSetChanged();
                                 updateIsJoined();
@@ -336,7 +379,7 @@ public class FieldActivity extends AppCompatActivity {
             }) {
                 protected Map<String, String> getParams() {
                     Map<String, String> params = new HashMap<>();
-                    params.put("place_id", place_id);
+                    params.put("place_id", currField.getPlaceId());
                     params.put("Username", playerName);
                     return params;
                 }
@@ -364,7 +407,7 @@ public class FieldActivity extends AppCompatActivity {
      */
     public void recordGame(View view) {
         Intent recordGameIntent = new Intent(this, GameStatRecordActivity.class);
-        recordGameIntent.putExtra("place_id", place_id);
+        recordGameIntent.putExtra("place_id", currField.getPlaceId());
         startActivity(recordGameIntent);
     }
 }
